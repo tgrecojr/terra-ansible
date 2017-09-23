@@ -1,8 +1,8 @@
 
-resource "aws_key_pair" "auth" {
-  key_name   = "${var.key_name}"
-  public_key = "${file(var.public_key_path)}"
-}
+#resource "aws_key_pair" "auth" {
+#  key_name   = "${var.key_name}"
+#  public_key = "${file(var.public_key_path)}"
+#}
 
 resource "aws_instance" "greco_ec2" {
   # The connection block tells our provisioner how to
@@ -38,10 +38,10 @@ resource "aws_instance" "greco_ec2" {
   }
 
   # force Terraform to wait until a connection can be made, so that Ansible doesn't fail when trying to provision
-  #provisioner "remote-exec" {
-  #  inline = [
-  #    "echo 'Remote execution connected.'"
-  #  ]
-  #}
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'Remote execution connected.'"
+    ]
+  }
 }
 
