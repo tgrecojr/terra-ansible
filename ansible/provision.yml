@@ -1,21 +1,47 @@
 ---
-- hosts: web
+- hosts: greco_ec2
   name: configuration play
-  user: ubuntu
+  user: ec2-user
 
-  # https://gist.github.com/gwillem/4ba393dceb55e5ae276a87300f6b8e6f#gistcomment-1914049
   gather_facts: false
-  pre_tasks:
-    - name: Install python for Ansible
-      become: true
-      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-      changed_when: false
-    - setup: # aka gather_facts
+  
 
   tasks:
 
-    - name: Install nginx
+    - name: yum update all
+      register: yumout
       become: true
-      apt:
-        name: nginx
-        update_cache: true
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Allow 'wheel' group to have passwordless sudo
+      become: true
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+
+    - name: create users
+      become: true
+      user:
+        name: tgrecojr
+        groups: wheel
+        append: yes
+
+    - name: add authorized keye
+      become: true
+      authorized_key:
+        user: tgrecojr
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    - name: remove user
+      become: true
+      user:
+        name: ec2-user
+        state: absent
+        remove: yes
+        force: true
+  
