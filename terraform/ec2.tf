@@ -4,6 +4,23 @@
 #  public_key = "${file(var.public_key_path)}"
 #}
 
+data "aws_ami" "amazon-ec2-linux" {
+  most_recent = true
+  filter {
+    name = "name"
+    values = ["amzn-ami-*-x86_64-gp2"]
+  }
+  filter {
+    name = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter {
+    name = "owner-alias"
+    values = ["amazon"]
+  }
+  name_regex = "^((?!rc).)*$"
+}
+
 resource "aws_instance" "greco_ec2" {
   # The connection block tells our provisioner how to
   # communicate with the resource (instance)
@@ -19,8 +36,8 @@ resource "aws_instance" "greco_ec2" {
 
   # Lookup the correct AMI based on the region
   # we specified
-  ami = "${lookup(var.aws_amis, var.region)}"
-
+  #ami = "${lookup(var.aws_amis, var.region)}"
+  ami = "${data.aws_ami.amazon-ec2-linux.id}"
   # The name of our SSH keypair
   key_name = "${var.key_name}"
 
